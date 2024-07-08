@@ -1,3 +1,242 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:abb7a7b3ef640070547c7d8d82e954ae11ef647bebccf5229078bc54e9206955
-size 9951
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+import tensorflow as tf
+import sentencepiece
+import time
+import io
+from transformers import AutoTokenizer, TFCamembertForSequenceClassification, TFCamembertModel
+
+
+######################## ################################################################################################################################################################################
+st.set_page_config(layout="wide")
+
+hide_st_style = """
+                <style>
+                #MainMenu {visibility: hidden;}
+                footer {visibility: hidden;}
+                header {visibility: hidden;}
+                </style>
+                """
+
+st.markdown("""
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    """, unsafe_allow_html=True)
+
+
+st.markdown(
+    """
+    <style>
+    
+    body {
+        background-color: #ffffff; /* Couleur de fond par défaut */
+        color: #000000; /* Couleur de texte par défaut */
+        font-family: Arial, sans-serif;
+        padding: 1rem;
+    }
+    .video-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 500px; /* Ajustez la hauteur de la vidéo selon vos besoins */
+    }
+    
+    
+   .stApp {
+        /* Utilisez l'URL de votre image comme valeur de background-image */
+      
+        background-image: url('https://cdn.pixabay.com/photo/2021/11/04/06/27/artificial-intelligence-6767502_640.jpg');
+        background-size: contain; /* Ajuste la taille de l'image pour couvrir tout l'arrière-plan */
+        background-repeat: no-repeat; /* Empêche la répétition de l'image */
+        background-position: center center; /* Centre l'image horizontalement et verticalement */
+        color: #ffffff;
+        font-family: Arial, sans-serif;
+        padding: 1rem;
+        
+        background-attachment: scroll; # doesn't work;
+        
+    }
+
+
+    
+    .stButton button {
+        background-color:#866ef0;
+        color:white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .stButton button:hover {
+        background-color:#D3F7F4;
+    }
+
+    .stHeader {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+######################## ################################################################################################################################################################################
+
+# Définition des classes
+classes = {0: 'négatif', 1: 'neutre', 2: 'positif'}
+
+# Fonction pour charger le modèle
+#@st.cache_resource
+def load_model_file():
+    chemin = os.path.dirname(os.path.abspath(__file__))
+    filenames = os.listdir(chemin)
+    filenames = [f for f in filenames if f.endswith('.h5')]
+    if len(filenames) == 0:
+        st.error("Aucun fichier de modèle trouvé dans le répertoire.")
+        return None
+    selected_filename = st.selectbox('Choisissez votre modèle ', filenames, key='model_select')
+    model = tf.keras.models.load_model(os.path.join(chemin, selected_filename), custom_objects={'TFCamembertModel': TFCamembertModel}, compile=False)
+    
+    
+    progress_text = "Operation in progress. Please wait."
+    my_bar = st.progress(0, text=progress_text)
+
+    for percent_complete in range(100):
+        time.sleep(0.1)
+        my_bar.progress(percent_complete + 1, text=progress_text)
+
+    return model
+
+######################## ################################################################################################################################################################################
+
+# Fonction pour prédire le sentiment d'un Commentaire# Fonction pour prédire le sentiment d'un Commentaire
+def predict_sentiment(Comment, model, tokenizer):
+    # Encodage du Commentaire avec le tokenizer
+    inputs = tokenizer.encode_plus(Comment, add_special_tokens=True, return_tensors='tf', max_length=256, padding='max_length', truncation=True)
+    # Prédiction du sentiment avec le modèle
+    prediction = model.predict([inputs['input_ids'], inputs['attention_mask']])[0]
+    # Récupération de l'indice de la classe prédite
+    predicted_class_idx = np.argmax(prediction)
+    # Récupération du label de la classe prédite
+    predicted_class = classes[predicted_class_idx]
+    
+    return predicted_class
+
+
+######################## ################################################################################################################################################################################
+
+# Fonction pour afficher le diagramme
+def plot_sentimentss(df):
+    sentiment_counts = df['sentiment'].value_counts()
+    fig, ax = plt.subplots()
+    ax.bar(sentiment_counts.index, sentiment_counts.values, color=['green', 'gray', 'red'])
+    ax.set_title('Répartition des sentiments')
+    ax.set_xlabel('Sentiments')
+    ax.set_ylabel('Nombre de Commentaires')
+    # Ajout de la légende avec des valeurs numériques
+    for i, v in enumerate(sentiment_counts.values):
+        ax.text(i, v+1, str(v), ha='center', fontweight='bold')
+    st.pyplot(fig)
+
+
+def plot_sentiments(df):
+    sentiment_counts = df['sentiment'].value_counts()
+    fig, ax = plt.subplots(figsize=(6, 2))  # Spécification de la taille de la figure
+    ax.bar(sentiment_counts.index, sentiment_counts.values, color=['#6f00ff', '#009dff', '#0a0a0a'])  # Couleurs hexadécimales
+    ax.set_title('Répartition des sentiments', fontsize=12, fontweight='bold')
+    ax.set_xlabel('Sentiments', fontsize=8)
+    ax.set_ylabel('Nombre de Commentaires', fontsize=8)
+    
+    # Ajout de la légende avec des valeurs numériques
+    #for i, v in enumerate(sentiment_counts.values):
+    #    ax.text(i, v + 1, str(v), ha='center', fontweight='bold', fontsize=6)
+    
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    
+    st.pyplot(fig)
+
+#optimise moi cette fonction pour qu'elle soit plus belle, mets les mesures de la figure et que les courleurs mise soit hexadecimal'
+
+
+
+
+######################## ################################################################################################################################################################################
+
+
+def main():
+   
+
+    html_titre = """ 
+        <div style="padding: 13px; background-color: #866ef0; border: 5px solid #0d0c0c; border-radius: 10px;">
+        <h1 style="color:#0d0c0c; text-align: center; background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));">🤖 ANALYSEUR DE SENTIMENT ET PREDICATEUR DE SUJETS🤖<small><br> Powered by An\'s Learning </h3></h1></h1>
+        </div> 
+        </div> 
+        """
+    
+    st.markdown(html_titre, unsafe_allow_html = True)
+
+    st.markdown('<p style="text-align: center;font-size:15px;" > <bold><center><h1 style="color:#D3F7F4"> <bold>UPLOADER LE FICHIER DONT VOUS VOULEZ AVOIR LA PREDICTION DE SUJET DE VIDEO YOUTUBE<h1></bold><p>', unsafe_allow_html=True)
+    
+    # Upload du fichier
+    uploaded_file = st.file_uploader("Choisissez un fichier Excel ou CSV", type=["xlsx", "csv"])
+
+    # Bouton pour lancer la prédiction
+    if st.button("Lancer la prédiction"):
+        if uploaded_file is not None:
+            file_name = uploaded_file.name
+            try:
+                df = pd.read_excel(uploaded_file) if file_name.endswith('.xlsx') else pd.read_csv(uploaded_file, encoding='utf-8', errors='ignore')
+            except UnicodeDecodeError:
+                st.error("Erreur de décodage du fichier. Veuillez vérifier l'encodage.")
+                return
+            
+            st.write(df)
+
+            # Chargement du modèle
+            with st.spinner('Chargement du modèle...'):
+                model = load_model_file()
+                tokenizer = AutoTokenizer.from_pretrained("camembert/camembert-base-ccnet")
+
+            # Prédiction et affichage des résultats
+            with st.spinner('Prédiction des sentiments des Commentaires...'):
+                df['sentiment'] = df['Comment'].apply(lambda x: predict_sentiment(x, model, tokenizer))
+                plot_sentiments(df)
+
+                # Créer le nom du fichier de sortie
+                base_name, ext = os.path.splitext(file_name)
+                output_file_name = f"analysis_sentiment_of_videos_{base_name}{ext}"
+
+                # Créer le chemin complet du fichier de sortie
+                output_file_path = os.path.join("Analysis_Sentiment_Of_Videos", output_file_name)
+
+                # Créer le répertoire s'il n'existe pas
+                os.makedirs("Analysis_Sentiment_Of_Videos", exist_ok=True)
+
+                # Sauvegarder le fichier dans le répertoire "eriko"
+                df.to_csv(output_file_path, index=False, encoding='utf-8', errors='ignore')
+
+                # Téléchargement du fichier de résultats
+                with open(output_file_path, "r", encoding='utf-8', errors='ignore') as f:
+                    with st.spinner('Chargement du modèle...'):
+                        st.download_button(label="Télécharger les résultats", data=f.read(), file_name=output_file_name, mime='text/csv')
+                        #download_button = st.download_button(label="Télécharger les résultats", data=f.read(), file_name=output_file_name, mime='text/csv')
+                        #download_button 
+                # Bouton pour réinitialiser le fichier et le diagramme
+                if st.button("Réinitialiser"):
+                    uploaded_file = None
+
+# Lancement de l'application
+if __name__ == "__main__":
+    main()
+
+
+######################## ################################################################################################################################################################################
