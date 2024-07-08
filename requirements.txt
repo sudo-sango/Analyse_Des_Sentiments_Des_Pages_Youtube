@@ -94,8 +94,6 @@ streamlit==1.36.0
 tenacity==8.4.2
 tensorboard==2.16.2
 tensorboard-data-server==0.7.2
-tensorflow
-tensorflow-intel
 tensorflow-io-gcs-filesystem==0.31.0
 termcolor==2.4.0
 tf_keras==2.16.0
@@ -114,4 +112,6 @@ Werkzeug==3.0.3
 wrapt==1.16.0
 XlsxWriter==3.2.0
 yarl==1.9.4
-pyhon==3.10.0
+tensorflow==2.16.2
+tensorflow-intel==2.16.2
+tensorflow-io-gcs-filesystem==0.31.0
