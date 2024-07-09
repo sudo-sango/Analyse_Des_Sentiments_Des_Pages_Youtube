@@ -12,6 +12,8 @@ from jinja2 import Environment, FileSystemLoader
 import openai
 import pandas as pd
 
+from weasyprint import HTML
+
 ######################## ################################################################################################################################################################################
 
 openai.api_key = openai.api_key
@@ -182,7 +184,7 @@ def update_comments(df):
 
 config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
 
-def convert_html_to_pdf(html_file, pdf_file):
+def convert_html_to_pdff(html_file, pdf_file):
     options = {
         'page-size': 'Letter',
         'encoding': "UTF-8"
@@ -190,6 +192,8 @@ def convert_html_to_pdf(html_file, pdf_file):
     pdfkit.from_file(html_file, pdf_file, options=options, configuration=config)
 
 
+def convert_html_to_pdf(html_file, pdf_file):
+    HTML(html_file).write_pdf(pdf_file)
 ######################## ################################################################################################################################################################################
 
 
