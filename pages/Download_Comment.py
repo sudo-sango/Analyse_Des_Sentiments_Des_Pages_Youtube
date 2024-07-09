@@ -256,10 +256,9 @@ def extract_video_id(link):
     return video_id
 ######################## ################################################################################################################################################################################
 
-
-#def create_folder(folder_name):
- #   if not os.path.exists(folder_name):
- #       os.makedirs(folder_name)
+def create_folder(folder_name):
+  if not os.path.exists(folder_name):
+    os.makedirs(folder_name)
 ######################## ################################################################################################################################################################################
 
 
@@ -306,17 +305,17 @@ def main():
             video_title = display_video_info(video_id, api_key)
 
             # Créez les dossiers
-            #create_folder('a')
-            #create_folder('b')
+            create_folder('a')
+            create_folder('b')
 
-            # Enregistrez les commentaires dans le dossier "comments"
-            comments_path = os.path.join('comments', f"{video_title}.xlsx")
+            # Enregistrez les commentaires dans le dossier "a"
+            comments_path = os.path.join('a', f"{video_title}.xlsx")
             df_comments.to_excel(comments_path, index=False)
 
             df_filtered = prediction(df_comments)
 
-            # Enregistrez le fichier de prédiction dans le dossier "predict"
-            predict_path = os.path.join('predict', f"{video_title}_PREDICTION.xlsx")
+            # Enregistrez le fichier de prédiction dans le dossier "b"
+            predict_path = os.path.join('b', f"{video_title}_PREDICTION.xlsx")
             df_filtered.to_excel(predict_path, index=False)
 
             # Préparation des fichiers pour téléchargement
