@@ -162,14 +162,23 @@ def traitement(df_file):
     # Supprimer les informations de fuseau horaire des objets datetime
     df_file["PublishedDate"] = df_file["PublishedDate"].dt.tz_localize(None)
 
-
-    # Filtrer les lignes avec des dates invalides (NaT)
-    #df_file = df_file.dropna(subset=["PublishedDate"])
-    
     return df_file
 
 ######################## ################################################################################################################################################################################
 def main():
+
+    html_titre = """ 
+        <div style="padding: 13px; background-color: #866ef0; border: 5px solid #0d0c0c; border-radius: 10px;">
+        <h1 style="color:#0d0c0c; text-align: center; background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));">🤖 ANALYSEUR DE SENTIMENT ET PREDICATEUR DE SUJETS🤖<small><br> Powered by An\'s Learning </h3></h1></h1>
+        </div> 
+        </div> 
+        """
+    
+    st.markdown(html_titre, unsafe_allow_html = True)
+
+    st.markdown('<p style="text-align: center;font-size:15px;" > <bold><center><h1 style="color:#D3F7F4"> <bold>Analyse des données avec diagramme en chandelier japonais<h1></bold><p>', unsafe_allow_html=True)
+    
+
     # Télécharger un fichier Excel
     uploaded_file = st.file_uploader("Téléchargez un fichier Excel", type=["xlsx", "xls"])
 
