@@ -99,21 +99,34 @@ def load_model_file():
     chemin = os.path.dirname(os.path.abspath(__file__))
     filenames = os.listdir(chemin)
     filenames = [f for f in filenames if f.endswith('.h5')]
+    
     if len(filenames) == 0:
         st.error("Aucun fichier de modèle trouvé dans le répertoire.")
         return None
+    
     selected_filename = st.selectbox('Choisissez votre modèle ', filenames, key='model_select')
-    model = tf.keras.models.load_model(os.path.join(chemin, selected_filename), custom_objects={'TFCamembertModel': TFCamembertModel}, compile=False)
+    model_path = os.path.join(chemin, selected_filename)
     
-    
-    progress_text = "Operation in progress. Please wait."
+    # Affichage de la barre de progression
+    progress_text = "Chargement du modèle en cours. Veuillez patienter..."
     my_bar = st.progress(0, text=progress_text)
-
-    for percent_complete in range(100):
-        time.sleep(0.1)
-        my_bar.progress(percent_complete + 1, text=progress_text)
-
-    return model
+    
+    try:
+        # Chargement du modèle
+        model = tf.keras.models.load_model(model_path, custom_objects={'TFCamembertModel': TFCamembertModel}, compile=False)
+        
+        # Mise à jour de la barre de progression
+        for percent_complete in range(100):
+            time.sleep(0.1)
+            my_bar.progress(percent_complete + 1, text=progress_text)
+        
+        # Succès du chargement
+        st.success("Modèle chargé avec succès !")
+        return model
+    
+    except Exception as e:
+        st.error(f"Erreur lors du chargement du modèle : {str(e)}")
+        return None
 
 ######################## ################################################################################################################################################################################
 
