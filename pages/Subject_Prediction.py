@@ -15,7 +15,8 @@ import pandas as pd
 
 ######################## ################################################################################################################################################################################
 
-openai.api_key = openai.api_key
+#openai.api_key = openai.api_key
+openai.api_key = st.secrets['openai']['openai.api_key']
 
 #config = pdfkit.configuration (wkhtmltopdf= 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe' )
 
