@@ -94,7 +94,8 @@ def load_data(file_name):
     data_dir = os.path.join(os.path.dirname(__file__), '..', 'Scrapping_Channel_Informations')
     file_path = os.path.join(data_dir, file_name)
     # Charger les données à partir du fichier Excel
-    df = pd.read_excel(file_path)
+    #df = pd.read_excel(file_path)
+    df = pd.read_excel(file_path, engine='openpyxl')
     return df
 
 ######################## ################################################################################################################################################################################
