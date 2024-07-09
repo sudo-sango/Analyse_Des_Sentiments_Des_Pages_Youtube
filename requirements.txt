@@ -43,13 +43,6 @@ tensorboard==2.16.2
 tensorboard-data-server==0.7.2
 
 
-libcairo2
-pango1.0-tools
-libpango1.0-0
-libgdk-pixbuf2.0-0
-libffi-dev
-shared-mime-info
-
 
 weasyprint
 
