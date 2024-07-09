@@ -257,9 +257,9 @@ def extract_video_id(link):
 ######################## ################################################################################################################################################################################
 
 
-def create_folder(folder_name):
-    if not os.path.exists(folder_name):
-        os.makedirs(folder_name)
+#def create_folder(folder_name):
+ #   if not os.path.exists(folder_name):
+ #       os.makedirs(folder_name)
 ######################## ################################################################################################################################################################################
 
 
@@ -306,8 +306,8 @@ def main():
             video_title = display_video_info(video_id, api_key)
 
             # Créez les dossiers
-            create_folder('a')
-            create_folder('b')
+            #create_folder('a')
+            #create_folder('b')
 
             # Enregistrez les commentaires dans le dossier "comments"
             comments_path = os.path.join('comments', f"{video_title}.xlsx")
