@@ -7,6 +7,7 @@ import tensorflow as tf
 import sentencepiece
 import time
 import io
+import h5py as h5
 from transformers import AutoTokenizer, TFCamembertForSequenceClassification, TFCamembertModel
 
 
