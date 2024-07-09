@@ -12,13 +12,12 @@ from jinja2 import Environment, FileSystemLoader
 import openai
 import pandas as pd
 
-from weasyprint import HTML
 
 ######################## ################################################################################################################################################################################
 
 openai.api_key = openai.api_key
 
-config = pdfkit.configuration (wkhtmltopdf= 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe' )
+#config = pdfkit.configuration (wkhtmltopdf= 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe' )
 
 st.set_page_config(layout="wide")
 
@@ -94,7 +93,7 @@ st.markdown(
 
 
 def update_comments(df):
-    openai.api_key ="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"
+    openai.api_key = openai.api_key
 
     # Initialiser les nouvelles colonnes dans le DataFrame si elles n'existent pas encore
     if 'Résumé' not in df.columns:
@@ -182,7 +181,7 @@ def update_comments(df):
 
 
 
-config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
+#config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
 
 def convert_html_to_pdff(html_file, pdf_file):
     options = {
