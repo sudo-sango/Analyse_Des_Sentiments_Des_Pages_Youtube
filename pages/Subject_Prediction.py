@@ -243,11 +243,13 @@ def main():
             #pdf_file = f'subject_Prediction_of_{file_name}.pdf'
             
             html_file = os.path.join(output_dir, f'subject_Prediction_of_{file_name}.html')
-            pdf_file = os.path.join(output_dir, f'subject_Prediction_of_{file_name}.pdf')
+            #pdf_file = os.path.join(output_dir, f'subject_Prediction_of_{file_name}.pdf')
             
             generate_html(updated_data, html_file)
-            convert_html_to_pdf(html_file, pdf_file)
-            st.markdown(f'<a href="{pdf_file}" download="{pdf_file}">Télécharger les predictions</a>', unsafe_allow_html=True)
+            #convert_html_to_pdf(html_file, pdf_file)
+          
+            #st.markdown(f'<a href="{pdf_file}" download="{pdf_file}">Télécharger les predictions</a>', unsafe_allow_html=True)
+            st.markdown(f'<a href="{html_file}" download="{html_file}">Télécharger les predictions</a>', unsafe_allow_html=True)
             st.snow()
 
             
