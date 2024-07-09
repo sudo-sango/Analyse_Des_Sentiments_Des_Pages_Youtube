@@ -78,24 +78,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-######################## ################################################################################################################################################################################
 
-# Fonction pour lister tous les fichiers .xlsx dans le dossier actuel
-
-def list_excel_files():
-    data_dir = os.path.join(os.path.dirname(__file__), '..', 'Scrapping_Channel_Informations')
-    return [f for f in os.listdir(data_dir) if f.endswith('.xlsx')]
-
-
-
-######################## ################################################################################################################################################################################
-
-def load_data(file_name):
-    data_dir = os.path.join(os.path.dirname(__file__), '..', 'Scrapping_Channel_Informations')
-    file_path = os.path.join(data_dir, file_name)
-    # Charger les données à partir du fichier Excel
-    df = pd.read_excel(file_path)
-    return df
 
 ######################## ################################################################################################################################################################################
 
@@ -162,32 +145,43 @@ def calculate_correlations(df_filtered, columns):
     return df_filtered[columns].corr()
 
 ######################## ################################################################################################################################################################################
+def traitement(df_file):
+    # Convertir les colonnes en entier
+    df_file['Likes'] = pd.to_numeric(df_file['Likes'], errors='coerce')
+    df_file['Comments'] = pd.to_numeric(df_file['Comments'], errors='coerce')
+    df_file['Views'] = pd.to_numeric(df_file['Views'], errors='coerce')
 
+    df_file['Likes'] = df_file['Likes'].fillna(0).astype(int)
+    df_file['Comments'] = df_file['Comments'].fillna(0).astype(int)
+    df_file['Views'] = df_file['Views'].fillna(0).astype(int)
+  
+        
+    # Convertir la colonne PublishedDate en format datetime
+    df_file["PublishedDate"] = pd.to_datetime(df_file["PublishedDate"])
+
+    # Supprimer les informations de fuseau horaire des objets datetime
+    df_file["PublishedDate"] = df_file["PublishedDate"].dt.tz_localize(None)
+
+
+    # Filtrer les lignes avec des dates invalides (NaT)
+    #df_file = df_file.dropna(subset=["PublishedDate"])
+    
+    return df_file
+
+######################## ################################################################################################################################################################################
 def main():
-    html_titre = """ 
-        <div style="padding: 13px; background-color: #866ef0; border: 5px solid #0d0c0c; border-radius: 10px;">
-        <h1 style="color:#0d0c0c; text-align: center; background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));">🤖 ANALYSEUR DE SENTIMENT ET PREDICATEUR DE SUJETS🤖<small><br> Powered by An\'s Learning </h3></h1></h1>
-        </div> 
-        </div> 
-        """
-    
-    st.markdown(html_titre, unsafe_allow_html = True)
-
-    st.markdown('<p style="text-align: center;font-size:15px;" > <bold><center><h1 style="color:#D3F7F4"> <bold>Analyse des données avec diagramme en chandelier japonais<h1></bold><p>', unsafe_allow_html=True)
-    
-
     # Télécharger un fichier Excel
     uploaded_file = st.file_uploader("Téléchargez un fichier Excel", type=["xlsx", "xls"])
 
     if uploaded_file:
         # Charger les données
-        df = pd.read_excel(uploaded_file)
+        df_file = pd.read_excel(uploaded_file)
+
+        # Traiter les données
+        df = traitement(df_file)
 
         # Fixer la colonne de date à "PublishedDate"
         date_column = "PublishedDate"
-
-        # Convertir les dates en datetime pour les widgets de sélection de date
-        df[date_column] = pd.to_datetime(df[date_column], errors='coerce', format='%Y-%m-%dT%H:%M:%S.%fZ')
 
         # Demander à l'utilisateur de choisir une date de début et de fin
         min_date = df[date_column].min()
@@ -200,44 +194,62 @@ def main():
         if st.button("Afficher les graphiques"):
             df_filtered = filter_data_by_date(df, date_column, start_date, end_date)
 
-            # Créer et afficher les graphiques pour chaque colonne
-            for column in ["Likes", "Views", "Comments", "Categorie", "Periodicite"]:
-                create_candlestick_chart(df_filtered, date_column, column, f'Graphique de {column}')
+            # Liste des colonnes à utiliser pour les opérations
+            columns_to_use = ["Likes", "Views", "Comments", "Categorie", "Periodicite"]
 
-            # Calculer la liste des 10 vidéos avec le plus de commentaires, likes, views sur 6 mois et 3 mois
-            six_months_ago = pd.to_datetime(end_date) - timedelta(days=6*30)
-            three_months_ago = pd.to_datetime(end_date) - timedelta(days=3*30)
+            # Créer et afficher les graphiques pour chaque colonne disponible
+            for column in columns_to_use:
+                if column in df_filtered.columns:
+                    create_candlestick_chart(df_filtered, date_column, column, f'Graphique de {column}')
+                else:
+                    st.success(f"Aucune donnée disponible pour '{column}' dans le dataset actuel.")
 
-            df_last_6_months = filter_data_by_date(df_filtered, date_column, six_months_ago, end_date)
-            df_last_3_months = filter_data_by_date(df_filtered, date_column, three_months_ago, end_date)
+            # Calculer et afficher les top 10 vidéos par Likes, Comments, Views
+            for period_label, period_df in [("6 derniers mois", df_filtered), ("3 derniers mois", df_filtered)]:
+                if "Comments" in period_df.columns:
+                    st.write(f"Top 10 vidéos des {period_label}")
+                    st.write(f'Top 10 vidéos par Comments')
+                    st.write(get_top_videos(period_df, "Comments"))
+                else:
+                    st.success(f"Aucune donnée disponible pour 'Comments' dans les {period_label}.")
 
-            st.write("Top 10 vidéos des 6 derniers mois")
-            for column in ["Comments", "Likes", "Views"]:
-                st.write(f'Top 10 vidéos par {column}')
-                st.write(get_top_videos(df_last_6_months, column))
+                if "Likes" in period_df.columns:
+                    st.write(f"Top 10 vidéos des {period_label}")
+                    st.write(f'Top 10 vidéos par Likes')
+                    st.write(get_top_videos(period_df, "Likes"))
+                else:
+                    st.success(f"Aucune donnée disponible pour 'Likes' dans les {period_label}.")
 
-            st.write("Top 10 vidéos des 3 derniers mois")
-            for column in ["Comments", "Likes", "Views"]:
-                st.write(f'Top 10 vidéos par {column}')
-                st.write(get_top_videos(df_last_3_months, column))
+                if "Views" in period_df.columns:
+                    st.write(f"Top 10 vidéos des {period_label}")
+                    st.write(f'Top 10 vidéos par Views')
+                    st.write(get_top_videos(period_df, "Views"))
+                else:
+                    st.success(f"Aucune donnée disponible pour 'Views' dans les {period_label}.")
 
-            # Calculer la moyenne des colonnes Likes, Comment, Views, Periodicite sur 6 mois et 3 mois
-            avg_6_months = calculate_average(df_last_6_months, ["Likes", "Comments", "Views", "Periodicite"])
-            avg_3_months = calculate_average(df_last_3_months, ["Likes", "Comments", "Views", "Periodicite"])
+            # Calculer et afficher les moyennes sur 6 mois et 3 mois
+            for period_label, period_df in [("6 derniers mois", df_filtered), ("3 derniers mois", df_filtered)]:
+                columns_to_average = ["Likes", "Comments", "Views", "Periodicite"]
+                for column in columns_to_average:
+                    if column in period_df.columns:
+                        avg_data = calculate_average(period_df, [column])
+                        st.write(f"Moyenne des {period_label} par {column}")
+                        st.write(avg_data)
+                    else:
+                        st.success(f"Aucune donnée disponible pour '{column}' dans les {period_label}.")
 
-            st.write("Moyenne des 6 derniers mois")
-            st.write(avg_6_months)
-
-            st.write("Moyenne des 3 derniers mois")
-            st.write(avg_3_months)
-
-            # Calculer et afficher les valeurs de corrélation sur 6 mois et 3 mois
-            st.write("Valeurs de corrélation des 6 derniers mois")
-            st.write(calculate_correlations(df_last_6_months, ["Likes", "Comments", "Views", "Periodicite"]))
-
-            st.write("Valeurs de corrélation des 3 derniers mois")
-            st.write(calculate_correlations(df_last_3_months, ["Likes", "Comments", "Views", "Periodicite"]))
+            # Calculer et afficher les corrélations sur 6 mois et 3 mois
+            for period_label, period_df in [("6 derniers mois", df_filtered), ("3 derniers mois", df_filtered)]:
+                columns_to_correlate = ["Likes", "Comments", "Views", "Periodicite"]
+                if all(column in period_df.columns for column in columns_to_correlate):
+                    st.write(f"Valeurs de corrélation des {period_label}")
+                    st.write(calculate_correlations(period_df, columns_to_correlate))
+                else:
+                    #st.write(f"Les colonnes nécessaires pour calculer la corrélation ne sont pas toutes présentes dans les {period_label}.")
+                    st.success(f"Les colonnes nécessaires pour calculer la corrélation ne sont pas toutes présentes dans les {period_label}.")
 
 # Exécuter la fonction principale
 if __name__ == "__main__":
     main()
+
+
