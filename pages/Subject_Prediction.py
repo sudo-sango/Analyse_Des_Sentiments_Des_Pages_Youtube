@@ -15,8 +15,7 @@ from io import StringIO
 import base64
 ######################## ################################################################################################################################################################################
 
-openai.api_key ="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"
-
+openai.api_key =openai.api_key
 config = pdfkit.configuration (wkhtmltopdf= 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe' )
 
 st.set_page_config(layout="wide")
