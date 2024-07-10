@@ -11,14 +11,13 @@ import pdfkit
 from jinja2 import Environment, FileSystemLoader
 import openai
 import pandas as pd
-
-
+from io import StringIO
+import base64
 ######################## ################################################################################################################################################################################
 
-openai.api_key = openai.api_key
-#openai.api_key = st.secrets['openai']['openai.api_key']
+openai.api_key ="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"
 
-#config = pdfkit.configuration (wkhtmltopdf= 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe' )
+config = pdfkit.configuration (wkhtmltopdf= 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe' )
 
 st.set_page_config(layout="wide")
 
@@ -94,7 +93,7 @@ st.markdown(
 
 
 def update_comments(df):
-    openai.api_key = openai.api_key
+    openai.api_key ="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"
 
     # Initialiser les nouvelles colonnes dans le DataFrame si elles n'existent pas encore
     if 'Résumé' not in df.columns:
@@ -178,44 +177,23 @@ def update_comments(df):
 
     return df
 
+
+
 ######################## ################################################################################################################################################################################
 
 
-
-#config = pdfkit.configuration(wkhtmltopdf='C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe')
-
-def convert_html_to_pdff(html_file, pdf_file):
-    options = {
-        'page-size': 'Letter',
-        'encoding': "UTF-8"
-    }
-    pdfkit.from_file(html_file, pdf_file, options=options, configuration=config)
-
-
-def convert_html_to_pdf(html_file, pdf_file):
-    HTML(html_file).write_pdf(pdf_file)
-######################## ################################################################################################################################################################################
-
-
-def generate_html(df, html_file):
+def generate_html(df):
     env = Environment(loader=FileSystemLoader('templates'))
     template = env.get_template('prediction3.html')
     html = template.render(data=df.to_dict('records'))
-    with open(html_file, 'w', encoding='utf-8') as f:
-        f.write(html)
 
+    return html    
 
 
 ######################## ################################################################################################################################################################################
 
 
-# Fonction principale
 def main():
-
-        # Create 'eriko' directory if it doesn't exist
-    output_dir = 'Subjets_Prediction_Of_Videos'
-    os.makedirs(output_dir, exist_ok=True)
-     
     html_titre = """ 
         <div style="padding: 13px; background-color: #866ef0; border: 5px solid #0d0c0c; border-radius: 10px;">
         <h1 style="color:#0d0c0c; text-align: center; background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));">🤖 ANALYSEUR DE SENTIMENT ET PREDICATEUR DE SUJETS🤖<small><br> Powered by An\'s Learning </h3></h1></h1>
@@ -227,31 +205,26 @@ def main():
 
     st.markdown('<p style="text-align: center;font-size:15px;" > <bold><center><h1 style="color:#D3F7F4"> <bold>UPLOADER LE FICHIER DONT VOUS VOULEZ AVOIR LA PREDICTION DE SUJET DE VIDEO YOUTUBE<h1></bold><p>', unsafe_allow_html=True)
  
+    output_dir = 'Subjets_Prediction_Of_Videos'
+    os.makedirs(output_dir, exist_ok=True)  
+
     uploaded_file = st.file_uploader("Entrer le fichier Excel", type=['xls', 'xlsx'])
 
     if uploaded_file is not None:
-        # Lecture du fichier Excel
         data = pd.read_excel(uploaded_file)
         file_name = os.path.splitext(uploaded_file.name)[0]
         
-        # Bouton pour lancer la prédiction
         if st.button('Prediction'):
-            # Mise à jour des commentaires
             updated_data = update_comments(data)
-        
-            #html_file = f'subject_Prediction_of_{file_name}.html'
-            #pdf_file = f'subject_Prediction_of_{file_name}.pdf'
-            
-            html_file = os.path.join(output_dir, f'subject_Prediction_of_{file_name}.html')
-            #pdf_file = os.path.join(output_dir, f'subject_Prediction_of_{file_name}.pdf')
-            
-            generate_html(updated_data, html_file)
-            #convert_html_to_pdf(html_file, pdf_file)
-          
-            #st.markdown(f'<a href="{pdf_file}" download="{pdf_file}">Télécharger les predictions</a>', unsafe_allow_html=True)
-            st.markdown(f'<a href="{html_file}" download="{html_file}">Télécharger les predictions</a>', unsafe_allow_html=True)
-            st.snow()
 
+            html_content = generate_html(updated_data)
+            html_file = StringIO(html_content)
+            html_file.seek(0)
+            
+            b64 = base64.b64encode(html_file.read().encode()).decode()
+            href = f'<a href="data:text/html;base64,{b64}" download="subject_Prediction_of_{file_name}.html">Télécharger les predictions</a>'
+            st.markdown(href, unsafe_allow_html=True)
+            st.snow()
             
 
 # Exécuter la fonction principale
