@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta charset="UTF-8">
+
+    <title>Prediction</title>
+    <style>
+        body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  text-align: center;
+  font-size: 36px;
+  margin-top: 50px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 50px;
+}
+
+thead {
+  background-color: #f2f2f2;
+}
+
+th, td {
+  text-align: left;
+  padding: 12px;
+  border: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #ddd;
+}
+
+td {
+  white-space: pre-line;
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+    </style>
+</head>
+<body>
+    <h1>Résultats de la prédiction</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Commentaire</th>
+          <th>Résumé</th>
+          <th>Titre</th>
+          <th>Points</th>
+          <th>Script</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in data %}
+        <tr>
+          <td>{{ row.Comment }}</td>
+          <td>{{ row.Résumé }}</td>
+          <td>{{ row.Titre }}</td>
+          <td>{{ row.Points }}</td>
+          <td>{{ row.Script }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>
