@@ -224,7 +224,8 @@ def clone_and_pull_lfs(repo_url, repo_dir):
 
 
 def load_model_file(repo_dir):
-    model_dir = os.path.join(repo_dir, "pages")
+    model_dir = os.path.join(repo_dir)
+    #model_dir = os.path.join(repo_dir, "pages")
     filenames = [f for f in os.listdir(model_dir) if f.endswith('.h5')]
     
     if len(filenames) == 0:
