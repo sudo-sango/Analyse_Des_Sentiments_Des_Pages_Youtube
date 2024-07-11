@@ -96,7 +96,7 @@ classes = {0: 'négatif', 1: 'neutre', 2: 'positif'}
 
 
 def load_model_file():
-    model_path = 'mon_modele.h5'
+    model_path = 'a.h5'
     if os.path.exists(model_path):
         try:
             model = load_model(model_path)
