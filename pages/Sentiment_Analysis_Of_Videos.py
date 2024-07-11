@@ -9,6 +9,7 @@ import time
 import io
 import h5py as h5
 from transformers import AutoTokenizer, TFCamembertForSequenceClassification, TFCamembertModel
+import git
 
 
 ######################## ################################################################################################################################################################################
