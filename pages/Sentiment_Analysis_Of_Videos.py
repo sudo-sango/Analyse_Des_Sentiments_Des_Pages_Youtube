@@ -217,10 +217,11 @@ def clone_and_pull_lfs(repo_url, repo_dir):
         git.Repo.clone_from(repo_url, repo_dir)
         os.chdir(repo_dir)
         os.system("git lfs pull")
+        print(f"Répertoire cloné: {os.getcwd()}")
     else:
         os.chdir(repo_dir)
         os.system("git lfs pull")
-
+        print(f"Répertoire existant: {os.getcwd()}")
 
 
 def load_model_file(repo_dir):
