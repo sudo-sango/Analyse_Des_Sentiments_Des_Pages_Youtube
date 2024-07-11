@@ -99,7 +99,7 @@ st.markdown(
 classes = {0: 'négatif', 1: 'neutre', 2: 'positif'}
 
 
-def load_model_file():
+def load_model_filee():
     model_path = 'a.h5'
     if os.path.exists(model_path):
         try:
@@ -117,7 +117,7 @@ def load_model_file():
 
 
 
-def load_model_filee():
+def load_model_file():
     chemin = os.path.dirname(os.path.abspath(__file__))
     filenames = os.listdir(chemin)
     filenames = [f for f in filenames if f.endswith('.h5')]
