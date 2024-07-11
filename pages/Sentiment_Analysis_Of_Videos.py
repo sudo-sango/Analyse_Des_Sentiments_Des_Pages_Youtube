@@ -117,7 +117,7 @@ def load_model_filee():
 
 
 
-def load_model_file():
+def load_model_fileee():
     chemin = os.path.dirname(os.path.abspath(__file__))
     filenames = os.listdir(chemin)
     filenames = [f for f in filenames if f.endswith('.h5')]
@@ -207,8 +207,53 @@ def plot_sentiments(df):
 ######################## ################################################################################################################################################################################
 
 
+REPO_URL = "https://github.com/sudo-sango/Analyse_Des_Sentiments_Des_Pages_Youtube.git"
+REPO_DIR = "Analyse_Des_Sentiments_Des_Pages_Youtube"
+
+def clone_and_pull_lfs(repo_url, repo_dir):
+    if not os.path.exists(repo_dir):
+        os.system("git lfs install")
+        git.Repo.clone_from(repo_url, repo_dir)
+        os.chdir(repo_dir)
+        os.system("git lfs pull")
+    else:
+        os.chdir(repo_dir)
+        os.system("git lfs pull")
+
+
+
+def load_model_file(repo_dir):
+    model_dir = os.path.join(repo_dir, "pages")
+    filenames = [f for f in os.listdir(model_dir) if f.endswith('.h5')]
+    
+    if len(filenames) == 0:
+        st.error("Aucun fichier de modèle trouvé dans le répertoire.")
+        return None
+    
+    selected_filename = st.selectbox('Choisissez votre modèle ', filenames, key='model_select')
+    model_path = os.path.join(model_dir, selected_filename)
+    
+    progress_text = "Chargement du modèle en cours. Veuillez patienter..."
+    my_bar = st.progress(0, text=progress_text)
+    
+    try:
+        model = tf.keras.models.load_model(model_path, custom_objects={'TFCamembertModel': TFCamembertModel}, compile=False)
+        
+        for percent_complete in range(100):
+            time.sleep(0.1)
+            my_bar.progress(percent_complete + 1, text=progress_text)
+        
+        st.success("Modèle chargé avec succès !")
+        return model
+    
+    except Exception as e:
+        st.error(f"Erreur lors du chargement du modèle : {str(e)}")
+        return None
+
+
+
+
 def main():
-   
 
     html_titre = """ 
         <div style="padding: 13px; background-color: #866ef0; border: 5px solid #0d0c0c; border-radius: 10px;">
@@ -221,10 +266,9 @@ def main():
 
     st.markdown('<p style="text-align: center;font-size:15px;" > <bold><center><h1 style="color:#D3F7F4"> <bold>UPLOADER LE FICHIER DONT VOUS VOULEZ AVOIR LA PREDICTION DE SUJET DE VIDEO YOUTUBE<h1></bold><p>', unsafe_allow_html=True)
     
-    # Upload du fichier
-    uploaded_file = st.file_uploader("Choisissez un fichier Excel ou CSV", type=["xlsx", "csv"])
 
-    # Bouton pour lancer la prédiction
+    uploaded_file = st.file_uploader("Choisissez un fichier CSV ou Excel", type=["csv", "xlsx"])
+
     if st.button("Lancer la prédiction"):
         if uploaded_file is not None:
             file_name = uploaded_file.name
@@ -235,43 +279,34 @@ def main():
                 return
             
             st.write(df)
-
-            # Chargement du modèle
+            clone_and_pull_lfs(REPO_URL, REPO_DIR)
+            
             with st.spinner('Chargement du modèle...'):
-                model = load_model_file()
+                model = load_model_file(REPO_DIR)
+                if model is None:
+                    return
                 tokenizer = AutoTokenizer.from_pretrained("camembert/camembert-base-ccnet")
-
-            # Prédiction et affichage des résultats
+            
             with st.spinner('Prédiction des sentiments des Commentaires...'):
                 df['sentiment'] = df['Comment'].apply(lambda x: predict_sentiment(x, model, tokenizer))
                 plot_sentiments(df)
-
-                # Créer le nom du fichier de sortie
+                
                 base_name, ext = os.path.splitext(file_name)
                 output_file_name = f"analysis_sentiment_of_videos_{base_name}{ext}"
-
-                # Créer le chemin complet du fichier de sortie
                 output_file_path = os.path.join("Analysis_Sentiment_Of_Videos", output_file_name)
-
-                # Créer le répertoire s'il n'existe pas
+                
                 os.makedirs("Analysis_Sentiment_Of_Videos", exist_ok=True)
-
-                # Sauvegarder le fichier dans le répertoire "eriko"
                 df.to_csv(output_file_path, index=False, encoding='utf-8', errors='ignore')
-
-                # Téléchargement du fichier de résultats
+                
                 with open(output_file_path, "r", encoding='utf-8', errors='ignore') as f:
-                    with st.spinner('Chargement du modèle...'):
-                        st.download_button(label="Télécharger les résultats", data=f.read(), file_name=output_file_name, mime='text/csv')
-                        #download_button = st.download_button(label="Télécharger les résultats", data=f.read(), file_name=output_file_name, mime='text/csv')
-                        #download_button 
-                # Bouton pour réinitialiser le fichier et le diagramme
+                    st.download_button(label="Télécharger les résultats", data=f.read(), file_name=output_file_name, mime='text/csv')
+
                 if st.button("Réinitialiser"):
                     uploaded_file = None
 
-# Lancement de l'application
 if __name__ == "__main__":
     main()
+
 
 
 ######################## ################################################################################################################################################################################
