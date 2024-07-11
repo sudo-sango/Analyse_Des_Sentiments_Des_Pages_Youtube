@@ -94,9 +94,26 @@ st.markdown(
 # Définition des classes
 classes = {0: 'négatif', 1: 'neutre', 2: 'positif'}
 
+
+def load_model_file():
+    model_path = 'mon_modele.h5'
+    if os.path.exists(model_path):
+        try:
+            model = load_model(model_path)
+            st.success("Modèle trouvé et chargé avec succès.")
+            return model
+        except Exception as e:
+            st.error(f"Erreur lors du chargement du modèle : {e}")
+            return None
+    else:
+        st.error("Le modèle n'a pas été trouvé dans le dossier spécifié.")
+        return None
 # Fonction pour charger le modèle
 #@st.cache_resource
-def load_model_file():
+
+
+
+def load_model_filee():
     chemin = os.path.dirname(os.path.abspath(__file__))
     filenames = os.listdir(chemin)
     filenames = [f for f in filenames if f.endswith('.h5')]
