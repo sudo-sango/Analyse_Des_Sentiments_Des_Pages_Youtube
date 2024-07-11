@@ -223,24 +223,25 @@ def clone_and_pull_lfs(repo_url, repo_dir):
         os.system("git lfs pull")
         print(f"Répertoire existant: {os.getcwd()}")
 
-
 def load_model_file(repo_dir):
-    model_dir = os.path.join(repo_dir)
-    #model_dir = os.path.join(repo_dir, "pages")
-    filenames = [f for f in os.listdir(model_dir) if f.endswith('.h5')]
+    model_paths = []
     
-    if len(filenames) == 0:
+    for root, _, files in os.walk(repo_dir):
+        for file in files:
+            if file.endswith('.h5'):
+                model_paths.append(os.path.join(root, file))
+    
+    if not model_paths:
         st.error("Aucun fichier de modèle trouvé dans le répertoire.")
         return None
     
-    selected_filename = st.selectbox('Choisissez votre modèle ', filenames, key='model_select')
-    model_path = os.path.join(model_dir, selected_filename)
+    selected_model_path = st.selectbox('Choisissez votre modèle ', model_paths, key='model_select')
     
     progress_text = "Chargement du modèle en cours. Veuillez patienter..."
     my_bar = st.progress(0, text=progress_text)
     
     try:
-        model = tf.keras.models.load_model(model_path, custom_objects={'TFCamembertModel': TFCamembertModel}, compile=False)
+        model = tf.keras.models.load_model(selected_model_path, custom_objects={'TFCamembertModel': TFCamembertModel}, compile=False)
         
         for percent_complete in range(100):
             time.sleep(0.1)
@@ -252,8 +253,6 @@ def load_model_file(repo_dir):
     except Exception as e:
         st.error(f"Erreur lors du chargement du modèle : {str(e)}")
         return None
-
-
 
 
 def main():
