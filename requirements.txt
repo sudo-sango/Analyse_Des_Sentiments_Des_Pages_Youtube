@@ -41,7 +41,7 @@ tensorflow==2.16.2
 
 tensorboard==2.16.2
 tensorboard-data-server==0.7.2
-git-lfs
+lfs
 
 
 weasyprint
