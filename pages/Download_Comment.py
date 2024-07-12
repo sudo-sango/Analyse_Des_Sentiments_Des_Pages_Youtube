@@ -160,40 +160,6 @@ def display_video_info(video_id, api_key):
 
 
 ######################## ################################################################################################################################################################################
-
-# Fonction pour filtrer les commentaires
-def predictionS(df_comments):
-    df_comments['Likes'] = pd.to_numeric(df_comments['Likes'], errors='coerce')
-    df_comments['Reply Count'] = pd.to_numeric(df_comments['Reply Count'], errors='coerce')
-    df_comments['Likes'] = df_comments['Likes'].fillna(0).astype(int)
-    df_comments['Reply Count'] = df_comments['Reply Count'].fillna(0).astype(int)
-  
-    df_filtered = df_comments[(df_comments['Likes'] > 5) & (df_comments['Reply Count'] > 5)]
-    return df_filtered
-
-
-
-def predictionaa(df_comments):
-    try:
-        df_comments['Likes'] = df_comments['Likes'].fillna(0)
-        df_comments['Reply Count'] = df_comments['Reply Count'].fillna(0)
-        
-        df_comments['Likes'] = pd.to_numeric(df_comments['Likes'], errors='coerce').astype(int)
-        df_comments['Reply Count'] = pd.to_numeric(df_comments['Reply Count'], errors='coerce').astype(int)
-    except Exception as e:
-        st.error(f"Erreur lors du remplissage des valeurs NaN et de la conversion en entier : {e}")
-        return pd.DataFrame()  # Retourne un DataFrame vide en cas d'erreur
-
-    try:
-        df_filtered = df_comments[(df_comments['Likes'] > 5) & (df_comments['Reply Count'] > 5)]
-    except Exception as e:
-        st.error(f"Erreur lors du filtrage du DataFrame : {e}")
-        return pd.DataFrame()  # Retourne un DataFrame vide en cas d'erreur
-
-    return df_filtered
-    #le script renvois cette erreur corrige <Erreur lors du remplissage des valeurs NaN et de la conversion en entier : Cannot convert non-finite values (NA or inf) to integer>
-
-
 def prediction(df_comments):
     # Suppression de la première ligne
     
@@ -202,39 +168,6 @@ def prediction(df_comments):
         df_comments = df_comments.iloc[1:]
         df_comments['Likes'] = pd.to_numeric(df_comments['Likes'], errors='coerce').fillna(0).astype(int)
         df_comments['Reply Count'] = pd.to_numeric(df_comments['Reply Count'], errors='coerce').fillna(0).astype(int)
-    except Exception as e:
-        st.error(f"Erreur lors du remplissage des valeurs NaN et de la conversion en entier : {e}")
-        return pd.DataFrame()  # Retourne un DataFrame vide en cas d'erreur
-
-    try:
-        df_filtered = df_comments[(df_comments['Likes'] > 5) & (df_comments['Reply Count'] > 5)]
-    except Exception as e:
-        st.error(f"Erreur lors du filtrage du DataFrame : {e}")
-        return pd.DataFrame()  # Retourne un DataFrame vide en cas d'erreur
-
-    return df_filtered
-
-#ooptimise moi cette fonction car la premiere chose qu'elle doit faire c'est de supprimer la premiere ligne de df qui est une ligne qui contient [Name,Likes etcc]
-
-
-def predictionaaaaa(df_comments):
-    try:
-        df_comments['Likes'] = pd.to_numeric(df_comments['Likes'], errors='coerce')
-        
-        df_comments['Reply Count'] = pd.to_numeric(df_comments['Reply Count'], errors='coerce')
-    except Exception as e:
-        st.error(f"Erreur lors de la conversion de 'Likes' en numérique : {e}")
-        return pd.DataFrame()  # Retourne un DataFrame vide en cas d'erreur
-
-    #try:
-    #    df_comments['Reply Count'] = pd.to_numeric(df_comments['Reply Count'], errors='coerce')
-    #except Exception as e:
-    #    st.error(f"Erreur lors de la conversion de 'Reply Count' en numérique : {e}")
-    #    return pd.DataFrame()  # Retourne un DataFrame vide en cas d'erreur
-
-    try:
-        df_comments['Likes'] = df_comments['Likes'].fillna(0).astype(int)
-        df_comments['Reply Count'] = df_comments['Reply Count'].fillna(0).astype(int)
     except Exception as e:
         st.error(f"Erreur lors du remplissage des valeurs NaN et de la conversion en entier : {e}")
         return pd.DataFrame()  # Retourne un DataFrame vide en cas d'erreur
@@ -256,9 +189,6 @@ def extract_video_id(link):
     return video_id
 ######################## ################################################################################################################################################################################
 
-def create_folder(folder_name):
-  if not os.path.exists(folder_name):
-    os.makedirs(folder_name)
 ######################## ################################################################################################################################################################################
 
 
@@ -292,7 +222,7 @@ def main():
             progress_text = "Operation in progress. Please wait."
             my_bar = st.progress(0, text=progress_text)
 
-            for percent_complete in range(25):
+            for percent_complete in range(100):
                 time.sleep(0.1)
                 my_bar.progress(percent_complete + 1, text=progress_text)
 
@@ -304,19 +234,8 @@ def main():
             df_comments = download_comments(video_id, api_key)
             video_title = display_video_info(video_id, api_key)
 
-            # Créez les dossiers
-            create_folder('a')
-            create_folder('b')
-
-            # Enregistrez les commentaires dans le dossier "a"
-            comments_path = os.path.join('a', f"{video_title}.xlsx")
-            df_comments.to_excel(comments_path, index=False)
 
             df_filtered = prediction(df_comments)
-
-            # Enregistrez le fichier de prédiction dans le dossier "b"
-            predict_path = os.path.join('b', f"{video_title}_PREDICTION.xlsx")
-            df_filtered.to_excel(predict_path, index=False)
 
             # Préparation des fichiers pour téléchargement
             output_comments = io.BytesIO()
@@ -345,13 +264,6 @@ def main():
             for percent_complete in range(100):
                 time.sleep(0.1)
                 my_bar.progress(percent_complete + 1, text=progress_text)
-
-
-
-
-
-  
-
 
 
 if __name__ == "__main__":
