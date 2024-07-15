@@ -11,11 +11,14 @@ import pdfkit
 from jinja2 import Environment, FileSystemLoader
 import openai
 import pandas as pd
+
 from io import StringIO
 import base64
+
 ######################## ################################################################################################################################################################################
 
-openai.api_key =openai.api_key
+
+config = pdfkit.configuration (wkhtmltopdf= 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe' )
 
 st.set_page_config(layout="wide")
 
@@ -91,8 +94,12 @@ st.markdown(
 
 
 def update_comments(df):
-    openai.api_key = openai.api_key
-
+   
+    #openai.api_key = st.secrets['openai']['openai.api_key']
+    openai.api_key =openai.api_key
+   
+    
+    
     # Initialiser les nouvelles colonnes dans le DataFrame si elles n'existent pas encore
     if 'Résumé' not in df.columns:
         df['Résumé'] = ''
@@ -175,8 +182,6 @@ def update_comments(df):
 
     return df
 
-
-
 ######################## ################################################################################################################################################################################
 
 
@@ -198,7 +203,6 @@ def main():
         </div> 
         </div> 
         """
-    
     st.markdown(html_titre, unsafe_allow_html = True)
 
     st.markdown('<p style="text-align: center;font-size:15px;" > <bold><center><h1 style="color:#D3F7F4"> <bold>UPLOADER LE FICHIER DONT VOUS VOULEZ AVOIR LA PREDICTION DE SUJET DE VIDEO YOUTUBE<h1></bold><p>', unsafe_allow_html=True)
