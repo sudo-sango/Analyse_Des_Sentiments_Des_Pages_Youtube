@@ -96,7 +96,8 @@ st.markdown(
 def update_comments(df):
    
     #openai.api_key = st.secrets['openai']['openai.api_key']
-    openai.api_key =openai.api_key
+    #openai.api_key =openai.api_key
+    openai.api_key = st.secrets['openai']['openai.api_key']
    
     
     
